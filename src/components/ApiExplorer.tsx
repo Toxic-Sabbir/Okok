@@ -26,6 +26,8 @@ import {
   Layers,
   ArrowRight,
   Zap,
+  Server,
+  Cloud,
 } from 'lucide-react';
 
 interface ApiExplorerProps {
@@ -184,7 +186,7 @@ interface HealthCheckResult {
 }
 
 export const ApiExplorer: React.FC<ApiExplorerProps> = () => {
-  const [activeTab, setActiveTab] = useState<'docs' | 'st-bot' | 'verification'>('docs');
+  const [activeTab, setActiveTab] = useState<'docs' | 'st-bot' | 'verification' | 'render'>('docs');
   const [selectedEndpoint, setSelectedEndpoint] = useState<EndpointConfig>(ENDPOINTS[0]);
   const [queryParams, setQueryParams] = useState<Record<string, string>>(selectedEndpoint.defaultParams);
   const [postBody, setPostBody] = useState<string>(selectedEndpoint.defaultBody || '');
@@ -195,6 +197,7 @@ export const ApiExplorer: React.FC<ApiExplorerProps> = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [copiedResponse, setCopiedResponse] = useState(false);
   const [copiedSnippet, setCopiedSnippet] = useState(false);
+  const [copiedRenderYaml, setCopiedRenderYaml] = useState(false);
   const [activeCodeTab, setActiveCodeTab] = useState<'curl' | 'js' | 'python' | 'st-bot'>('curl');
 
   // Chart snap preview toggle
@@ -1401,18 +1404,38 @@ Timestamp: ${new Date().toISOString()}
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-300 ml-0.5"></span>
             )}
           </button>
+
+          <button
+            onClick={() => setActiveTab('render')}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all min-h-[34px] ${
+              activeTab === 'render'
+                ? 'bg-teal-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Server size={14} className="text-teal-300" />
+            <span>Render Deploy</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/25 text-teal-200 border border-teal-500/40 font-mono font-bold">
+              Ready
+            </span>
+          </button>
         </div>
 
-        {/* ST-BOT Github Link */}
-        <a
-          href="https://github.com/sheikhtamimlover/ST-BOT"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden md:flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors shrink-0"
-        >
-          <ExternalLink size={13} />
-          <span>github.com/sheikhtamimlover/ST-BOT</span>
-        </a>
+        {/* ST-BOT Github Link & Render Pill */}
+        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-teal-500/15 border border-teal-500/30 text-teal-300 text-[11px] font-mono">
+            <Cloud size={11} /> Render Friendly
+          </span>
+          <a
+            href="https://github.com/sheikhtamimlover/ST-BOT"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden md:flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors shrink-0"
+          >
+            <ExternalLink size={13} />
+            <span>github.com/sheikhtamimlover/ST-BOT</span>
+          </a>
+        </div>
       </div>
 
       {/* Main Content Render */}
@@ -2210,6 +2233,262 @@ Timestamp: ${new Date().toISOString()}
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* VIEW 4: RENDER.COM PRODUCTION DEPLOYMENT HUB              */}
+        {/* ========================================================= */}
+        {activeTab === 'render' && (
+          <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 max-w-6xl mx-auto w-full">
+            {/* Header banner */}
+            <div className="bg-gradient-to-r from-[#0f1d2b] to-[#122336] border border-teal-500/30 rounded-xl p-4 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg shadow-teal-950/20">
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="p-2 bg-teal-500/20 rounded-lg text-teal-400">
+                    <Server size={20} />
+                  </span>
+                  <div>
+                    <h1 className="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">
+                      Render.com Production Deployment Hub
+                      <span className="text-[10px] font-mono font-bold bg-teal-500/20 text-teal-300 border border-teal-500/30 px-2 py-0.5 rounded">
+                        100% READY
+                      </span>
+                    </h1>
+                    <p className="text-xs text-slate-400">
+                      Zero-config blueprint deployment with dynamic <code className="text-teal-300">$PORT</code> binding, SSL proxy trust, and open CORS for ST-BOT.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href="https://dashboard.render.com/blueprints/new"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-md shadow-teal-500/25 min-h-[38px]"
+                >
+                  <ExternalLink size={14} />
+                  <span>Deploy to Render.com</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Render Readiness Matrix */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="p-3.5 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>render.yaml Blueprint</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
+                    Included
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Infrastructure-as-Code config in root directory. Render auto-detects build and start commands.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>Dynamic $PORT Binding</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
+                    0.0.0.0
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Listens on <code className="text-slate-300">process.env.PORT || 3000</code> at host <code className="text-slate-300">0.0.0.0</code> as required by Render.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>Reverse Proxy Trust</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
+                    app.set(1)
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  <code className="text-slate-300">trust proxy</code> enabled so Render Cloudflare/Envoy proxy terminates HTTPS without cookie or client IP loss.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>CORS Middleware</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
+                    cors(*)
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Allows remote ST-BOT instances, Facebook Messenger webhooks, and third-party dashboards to query without CORS blocks.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>Health Checks</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
+                    200 OK
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Responds to <code className="text-slate-300">/api/v1/health</code> and <code className="text-slate-300">/healthz</code> with zero-downtime uptime metadata.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                    <CheckCircle2 size={15} className="text-emerald-400" />
+                    <span>Graceful Shutdown</span>
+                  </span>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded">
+                    SIGTERM
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Cleans up active SSE connections when Render re-deploys or scales down instances to avoid unhandled socket errors.
+                </p>
+              </div>
+            </div>
+
+            {/* render.yaml Viewer & Copy */}
+            <div className="bg-[#111722] border border-[#1e2a3b] rounded-xl overflow-hidden">
+              <div className="px-4 py-3 bg-[#0d131d] border-b border-[#1b2535] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileCode size={15} className="text-teal-400" />
+                  <span className="text-xs font-bold text-slate-200">render.yaml (Blueprint Spec)</span>
+                </div>
+                <button
+                  onClick={() => {
+                    const yaml = `services:
+  - type: web
+    name: quotex-forex-api-hub
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production`;
+                    navigator.clipboard.writeText(yaml);
+                    setCopiedRenderYaml(true);
+                    setTimeout(() => setCopiedRenderYaml(false), 2000);
+                  }}
+                  className="px-3 py-1 bg-[#1a2538] hover:bg-[#25354e] text-slate-200 rounded text-xs flex items-center gap-1.5 transition-colors"
+                >
+                  {copiedRenderYaml ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+                  <span>{copiedRenderYaml ? 'Copied' : 'Copy render.yaml'}</span>
+                </button>
+              </div>
+              <div className="p-4 bg-[#090d14] font-mono text-xs text-teal-300 leading-relaxed overflow-x-auto">
+                <pre>{`services:
+  - type: web
+    name: quotex-forex-api-hub
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production`}</pre>
+              </div>
+            </div>
+
+            {/* 3-Step Setup Instructions */}
+            <div className="bg-[#111722] border border-[#1e2a3b] rounded-xl p-5 space-y-4">
+              <h2 className="text-xs sm:text-sm font-bold text-slate-100 flex items-center gap-2">
+                <Sparkles size={16} className="text-teal-400" />
+                <span>How to Deploy on Render.com in 3 Minutes</span>
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="p-3.5 bg-[#0e1420] border border-[#1a2436] rounded-lg space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center text-xs font-bold font-mono">
+                      1
+                    </span>
+                    <span className="text-xs font-bold text-slate-200">Connect GitHub Repo</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Push your codebase to GitHub or connect your existing repository in the Render Dashboard.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-[#0e1420] border border-[#1a2436] rounded-lg space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center text-xs font-bold font-mono">
+                      2
+                    </span>
+                    <span className="text-xs font-bold text-slate-200">Select Blueprint</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Click <strong>New +</strong> &rarr; <strong>Blueprint</strong>. Render reads <code className="text-teal-300">render.yaml</code> automatically.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-[#0e1420] border border-[#1a2436] rounded-lg space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center text-xs font-bold font-mono">
+                      3
+                    </span>
+                    <span className="text-xs font-bold text-slate-200">Connect ST-BOT</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Your assigned URL (e.g. <code className="text-teal-300">https://*.onrender.com</code>) is ready to paste into ST-BOT commands!
+                  </p>
+                </div>
+              </div>
+
+              {/* Render Build Settings Reference Table */}
+              <div className="bg-[#090d14] border border-[#192435] rounded-lg overflow-hidden text-xs font-mono">
+                <div className="p-2.5 bg-[#0f1725] border-b border-[#192435] font-bold text-slate-300">
+                  Manual Web Service Settings (If not using Blueprint):
+                </div>
+                <div className="divide-y divide-[#16202f] p-1 text-[11px]">
+                  <div className="flex justify-between p-2">
+                    <span className="text-slate-400">Runtime:</span>
+                    <span className="text-teal-300 font-bold">Node</span>
+                  </div>
+                  <div className="flex justify-between p-2">
+                    <span className="text-slate-400">Build Command:</span>
+                    <code className="text-amber-300 bg-[#121a28] px-1.5 py-0.5 rounded">npm install && npm run build</code>
+                  </div>
+                  <div className="flex justify-between p-2">
+                    <span className="text-slate-400">Start Command:</span>
+                    <code className="text-amber-300 bg-[#121a28] px-1.5 py-0.5 rounded">npm start</code>
+                  </div>
+                  <div className="flex justify-between p-2">
+                    <span className="text-slate-400">Health Check Path:</span>
+                    <code className="text-emerald-400 bg-[#121a28] px-1.5 py-0.5 rounded">/api/v1/health</code>
+                  </div>
+                  <div className="flex justify-between p-2">
+                    <span className="text-slate-400">Environment Variable:</span>
+                    <code className="text-sky-300 bg-[#121a28] px-1.5 py-0.5 rounded">NODE_ENV = production</code>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

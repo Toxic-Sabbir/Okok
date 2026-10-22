@@ -1,5 +1,6 @@
 import express from 'express';
 import type { Request, Response } from 'express';
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,18 +10,18 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
-app.use(express.json());
+// Trust reverse proxy headers (essential for Render.com, Heroku, Cloudflare)
+app.set('trust proxy', 1);
 
-// Enable CORS for API clients
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
+// Enable Cross-Origin Resource Sharing for ST-BOT and remote integrations
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  credentials: true,
+}));
+
+app.use(express.json());
 
 export type ForexCategory = 'major' | 'minor' | 'exotic' | 'commodity';
 
@@ -1250,19 +1251,26 @@ setInterval(tickSimulationEngine, 300);
 // API ROUTES (Forex + Analysis + News)
 // ==========================================
 
-// 1. Health
-app.get('/api/v1/health', (req: Request, res: Response) => {
+// 1. Health Checks (Compatible with Render.com healthCheckPath, Docker, K8s)
+const handleHealthCheck = (req: Request, res: Response) => {
   res.json({
     status: 'ok',
     service: 'Worldwide Forex Live Charts & Analysis API',
     version: '2.0.0',
+    platform: 'Render.com Ready',
+    port: PORT,
+    uptimeSeconds: Math.floor(process.uptime()),
     marketType: 'Worldwide Interbank Forex (No OTC)',
     timestamp: Date.now(),
     activeStreams: sseClients.length,
     forexPairsCount: assets.length,
     newsEventsCount: forexNewsCalendar.length,
   });
-});
+};
+
+app.get('/api/v1/health', handleHealthCheck);
+app.get('/healthz', handleHealthCheck);
+app.get('/health', handleHealthCheck);
 
 // 2. All Worldwide Forex Assets
 app.get('/api/v1/forex/assets', (req: Request, res: Response) => {
@@ -1676,9 +1684,33 @@ async function setupFrontend() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Worldwide Forex Live Charts & Analysis API running at http://0.0.0.0:${PORT}`);
   });
+
+  // Graceful shutdown on Render redeployments and SIGINT/SIGTERM
+  const handleShutdown = (signal: string) => {
+    console.log(`Received ${signal}. Shutting down cleanly...`);
+    // Close active SSE client connections
+    for (const client of sseClients) {
+      try {
+        client.res.write('event: shutdown\ndata: {"message":"Server restart"}\n\n');
+        client.res.end();
+      } catch {}
+    }
+    server.close(() => {
+      console.log('HTTP server closed successfully.');
+      process.exit(0);
+    });
+    // Force close after 5s if still hanging
+    setTimeout(() => {
+      console.error('Force closing after timeout');
+      process.exit(1);
+    }, 5000).unref();
+  };
+
+  process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+  process.on('SIGINT', () => handleShutdown('SIGINT'));
 }
 
 setupFrontend().catch((err) => {
