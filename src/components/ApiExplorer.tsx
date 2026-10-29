@@ -28,7 +28,12 @@ import {
   Zap,
   Server,
   Cloud,
+  Search,
+  BookOpen,
 } from 'lucide-react';
+import { ENDPOINT_SPECS } from '../utils/endpointDocs';
+import { generateMasterStBotCommand } from '../utils/masterStBotCmd';
+import { MasterCmdView } from './MasterCmdView';
 
 interface ApiExplorerProps {
   assets?: Asset[];
@@ -50,6 +55,19 @@ export interface EndpointConfig {
 }
 
 export const ENDPOINTS: EndpointConfig[] = [
+  {
+    id: 'get-quotes',
+    method: 'GET',
+    path: '/api/v1/forex/quotes',
+    name: 'Real-Time Interbank Quotes & Ticker (UTC+6)',
+    description: 'Returns real-time streaming interbank Forex quotes, bid/ask spreads, 24h high/low, and explicit UTC+6 timestamps (Bangladesh Standard Time / BST).',
+    category: 'All-In-One',
+    defaultParams: { category: 'all', search: '' },
+    cmdFileName: 'fxquote.js',
+    cmdName: 'fxquote',
+    cmdDescription: 'Real-time Forex quotes & spreads with live UTC+6 time',
+    cmdGuide: '{pn} [optional category: all | major | minor | exotic | commodity]',
+  },
   {
     id: 'get-screenshot',
     method: 'GET',
@@ -186,8 +204,19 @@ interface HealthCheckResult {
 }
 
 export const ApiExplorer: React.FC<ApiExplorerProps> = () => {
-  const [activeTab, setActiveTab] = useState<'docs' | 'st-bot' | 'verification' | 'render'>('docs');
+  const [activeTab, setActiveTab] = useState<'docs' | 'master-cmd' | 'st-bot' | 'verification' | 'render'>(() => {
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+      if (path.includes('master') || hash.includes('master') || path.includes('cmd')) return 'master-cmd';
+      if (path.includes('render') || hash.includes('render')) return 'render';
+      if (path.includes('verify') || hash.includes('verify')) return 'verification';
+    }
+    return 'docs';
+  });
   const [selectedEndpoint, setSelectedEndpoint] = useState<EndpointConfig>(ENDPOINTS[0]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [copiedEndpointPath, setCopiedEndpointPath] = useState(false);
   const [queryParams, setQueryParams] = useState<Record<string, string>>(selectedEndpoint.defaultParams);
   const [postBody, setPostBody] = useState<string>(selectedEndpoint.defaultBody || '');
   const [responseStatus, setResponseStatus] = useState<number | null>(null);
@@ -226,6 +255,20 @@ export const ApiExplorer: React.FC<ApiExplorerProps> = () => {
   const [streamLogs, setStreamLogs] = useState<{ id: string; time: string; data: string }[]>([]);
   const [tickCount, setTickCount] = useState(0);
   const eventSourceRef = useRef<EventSource | null>(null);
+
+  const filteredEndpoints = ENDPOINTS.filter((ep) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      ep.name.toLowerCase().includes(q) ||
+      ep.path.toLowerCase().includes(q) ||
+      ep.cmdName.toLowerCase().includes(q) ||
+      ep.category.toLowerCase().includes(q) ||
+      ep.description.toLowerCase().includes(q)
+    );
+  });
+
+  const currentSpec = ENDPOINT_SPECS.find((s) => s.id === selectedEndpoint.id) || ENDPOINT_SPECS[0];
 
   // Initialize customApiBase from window.location.origin
   useEffect(() => {
@@ -480,6 +523,64 @@ export const ApiExplorer: React.FC<ApiExplorerProps> = () => {
   // Generate ST-BOT Command Script for a given endpoint
   const generateStBotCommandCode = (ep: EndpointConfig) => {
     const origin = customApiBase || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+
+    if (ep.id === 'get-quotes') {
+      return `/**
+ * ST-BOT Command: ${ep.cmdFileName}
+ * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * Path: scripts/cmds/${ep.cmdFileName}
+ * Description: ${ep.cmdDescription}
+ * Timezone: UTC+6 (Bangladesh Standard Time / BST)
+ */
+
+const axios = require("axios");
+
+module.exports = {
+  config: {
+    name: "${ep.cmdName}",
+    aliases: ["quotes", "rate", "rates", "fxrate"],
+    version: "2.0.0",
+    author: "Forex APIX Engine",
+    countDown: 3,
+    role: 0,
+    shortDescription: "${ep.cmdDescription}",
+    longDescription: "Fetch live worldwide interbank Forex rates with bid/ask spreads and exact UTC+6 timestamps.",
+    category: "forex",
+    guide: "{pn} [optional category: all | major | minor | exotic | commodity]"
+  },
+
+  onStart: async function ({ api, event, args, message }) {
+    const reply = (text) => {
+      if (message && message.reply) return message.reply(text);
+      if (api && api.sendMessage) return api.sendMessage(text, event.threadID, event.messageID);
+    };
+
+    try {
+      const cat = (args[0] || "major").toLowerCase();
+      const res = await axios.get("${origin}/api/v1/forex/quotes?category=" + cat, { timeout: 8000 });
+      const data = res.data;
+      if (!data || !data.success) return reply("❌ Failed to fetch live quotes.");
+
+      const list = (data.data || []).slice(0, 8).map(q => {
+        const sign = q.change24h >= 0 ? "+" : "";
+        return \`• \${q.symbol}: \${q.price} (\${sign}\${q.change24h}%) | Spread: \${q.spreadPips}p\`;
+      }).join("\\n");
+
+      return reply(
+\`📈 ══ [ REAL-TIME FOREX INTERBANK QUOTES ] ══ 📈
+⏰ Time: \${data.timeUtc6}
+🌐 Timezone: \${data.timezone}
+⚡ Feed: \${data.marketStatus}
+
+\${list}
+
+💡 Type "!fx EUR_USD" for deep AI signal analysis!\`);
+    } catch (err) {
+      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+    }
+  }
+};`;
+    }
 
     if (ep.id === 'get-screenshot') {
       return `/**
@@ -1326,6 +1427,14 @@ Timestamp: ${new Date().toISOString()}
 
         {/* Status Pills & Primary Actions */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+          {/* Live UTC+6 Timezone Indicator */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#101723] border border-sky-500/30 rounded-lg" title="Server & Market Timezone: UTC+6 (Bangladesh Standard Time)">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="text-[11px] sm:text-xs font-mono font-bold text-sky-300">
+              UTC+6 (BST)
+            </span>
+          </div>
+
           {/* Health Status Indicator */}
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[#121926] border border-[#1f2c3f] rounded-lg">
             <span
@@ -1350,14 +1459,27 @@ Timestamp: ${new Date().toISOString()}
               <span>{isVerifyingAll ? `${verificationProgress}%` : 'Verify All'}</span>
             </button>
 
+            {/* ⭐ Download Unified Master Command (forex.js) */}
+            <button
+              onClick={() => {
+                const code = generateMasterStBotCommand(customApiBase || window.location.origin);
+                downloadFile('forex.js', code);
+              }}
+              className="px-3 sm:px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-[11px] sm:text-xs font-extrabold rounded-lg flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all min-h-[36px]"
+              title="Download All-In-One ST-BOT Command (forex.js)"
+            >
+              <Download size={13} />
+              <span>Download forex.js</span>
+            </button>
+
             {/* Download All Commands (.ZIP) */}
             <button
               onClick={handleDownloadAllZip}
               disabled={isZipping}
-              className="px-3 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] sm:text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-md shadow-indigo-600/25 transition-all disabled:opacity-50 min-h-[36px]"
+              className="hidden sm:flex px-3 sm:px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] sm:text-xs font-bold rounded-lg items-center gap-1.5 shadow-md shadow-indigo-600/25 transition-all disabled:opacity-50 min-h-[36px]"
             >
               {isZipping ? <RefreshCw size={12} className="animate-spin" /> : <FileArchive size={12} />}
-              <span>ZIP Bundle</span>
+              <span>ZIP (9 CMDs)</span>
             </button>
           </div>
         </div>
@@ -1370,12 +1492,24 @@ Timestamp: ${new Date().toISOString()}
             onClick={() => setActiveTab('docs')}
             className={`px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all min-h-[34px] ${
               activeTab === 'docs'
-                ? 'bg-emerald-600 text-white shadow-sm'
+                ? 'bg-emerald-600 text-white shadow-sm font-bold'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Terminal size={14} />
-            <span>REST API Docs &amp; Snap</span>
+            <BookOpen size={14} />
+            <span>API Documentation</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('master-cmd')}
+            className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center gap-1.5 transition-all min-h-[34px] ${
+              activeTab === 'master-cmd'
+                ? 'bg-indigo-600 text-white shadow-sm font-bold'
+                : 'text-amber-300 hover:text-amber-200 bg-amber-500/10 border border-amber-500/30'
+            }`}
+          >
+            <Sparkles size={14} className="text-amber-300" />
+            <span>⭐ All-In-One CMD (forex.js)</span>
           </button>
 
           <button
@@ -1386,8 +1520,8 @@ Timestamp: ${new Date().toISOString()}
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Bot size={14} className="text-amber-300" />
-            <span>ST-BOT CMDs (9)</span>
+            <Bot size={14} className="text-slate-300" />
+            <span>Individual CMDs (9)</span>
           </button>
 
           <button
@@ -1512,61 +1646,110 @@ Timestamp: ${new Date().toISOString()}
                 showMobileSidebar ? 'flex' : 'hidden lg:flex'
               }`}
             >
-              <div className="p-3 border-b border-[#1a2332] bg-[#090e17] flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  Endpoints ({ENDPOINTS.length})
-                </span>
-                <span className="text-[10px] text-emerald-400 font-mono">Real Forex</span>
+              <div className="p-3 border-b border-[#1a2332] bg-[#090e17] space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    Endpoints ({filteredEndpoints.length})
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-mono">Real Interbank</span>
+                </div>
+
+                <div className="relative">
+                  <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search endpoints..."
+                    className="w-full bg-[#121926] border border-[#1e2a3c] rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 font-mono"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs px-1"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* ⭐ FEATURED: ALL-IN-ONE MASTER CMD */}
+              <div className="p-2 border-b border-[#1a2332]">
+                <button
+                  onClick={() => setActiveTab('master-cmd')}
+                  className="w-full text-left p-2.5 rounded-lg bg-gradient-to-r from-amber-500/15 via-indigo-500/15 to-[#162130] border border-amber-500/30 hover:border-amber-400/50 transition-all group flex flex-col gap-1 shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 flex items-center gap-1">
+                      <Sparkles size={10} />
+                      <span>MASTER CMD</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-amber-300">forex.js</span>
+                  </div>
+                  <div className="text-xs font-bold text-slate-100 group-hover:text-amber-200 transition-colors">
+                    All-In-One ST-BOT Command
+                  </div>
+                  <div className="text-[11px] text-slate-400 leading-tight">
+                    Quotes, signals, news, scanner &amp; chart snaps in 1 single command
+                  </div>
+                </button>
               </div>
 
               <div className="p-2 space-y-1">
-                {ENDPOINTS.map((endpoint) => {
-                  const isSelected = selectedEndpoint.id === endpoint.id;
-                  const isGet = endpoint.method === 'GET';
-                  const health = healthResults[endpoint.id];
-                  const isSnap = endpoint.id === 'get-screenshot';
+                {filteredEndpoints.length === 0 ? (
+                  <div className="p-4 text-center text-xs text-slate-500">
+                    No endpoints match "{searchQuery}"
+                  </div>
+                ) : (
+                  filteredEndpoints.map((endpoint) => {
+                    const isSelected = selectedEndpoint.id === endpoint.id;
+                    const isGet = endpoint.method === 'GET';
+                    const health = healthResults[endpoint.id];
+                    const isSnap = endpoint.id === 'get-screenshot';
 
-                  return (
-                    <button
-                      key={endpoint.id}
-                      onClick={() => {
-                        setSelectedEndpoint(endpoint);
-                        setShowMobileSidebar(false);
-                      }}
-                      className={`w-full text-left p-2.5 rounded-lg text-xs transition-colors flex flex-col gap-1 ${
-                        isSelected
-                          ? 'bg-[#182333] border border-emerald-500/40 text-slate-100 shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-[#131b26]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 truncate">
-                          <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
-                              isSnap
-                                ? 'bg-amber-500/20 text-amber-300'
-                                : isGet
-                                ? 'bg-sky-500/20 text-sky-400'
-                                : 'bg-emerald-500/20 text-emerald-400'
-                            }`}
-                          >
-                            {endpoint.method}
-                          </span>
-                          <span className="font-semibold text-slate-200 truncate">{endpoint.name}</span>
+                    return (
+                      <button
+                        key={endpoint.id}
+                        onClick={() => {
+                          setSelectedEndpoint(endpoint);
+                          setShowMobileSidebar(false);
+                        }}
+                        className={`w-full text-left p-2.5 rounded-lg text-xs transition-colors flex flex-col gap-1 ${
+                          isSelected
+                            ? 'bg-[#182333] border border-emerald-500/40 text-slate-100 shadow-sm'
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-[#131b26]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 truncate">
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+                                isSnap
+                                  ? 'bg-amber-500/20 text-amber-300'
+                                  : isGet
+                                  ? 'bg-sky-500/20 text-sky-400'
+                                  : 'bg-emerald-500/20 text-emerald-400'
+                              }`}
+                            >
+                              {endpoint.method}
+                            </span>
+                            <span className="font-semibold text-slate-200 truncate">{endpoint.name}</span>
+                          </div>
+                          {health?.status === 'SUCCESS' && (
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Verified Operational" />
+                          )}
                         </div>
-                        {health?.status === 'SUCCESS' && (
-                          <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" title="Verified Operational" />
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 pl-1">
-                        <span className="truncate">{endpoint.path}</span>
-                        <span className="text-[10px] text-amber-400 font-bold shrink-0 ml-1">
-                          !{endpoint.cmdName}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
+                        <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 pl-1">
+                          <span className="truncate">{endpoint.path}</span>
+                          <span className="text-[10px] text-amber-400 font-bold shrink-0 ml-1">
+                            !{endpoint.cmdName}
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
               </div>
 
               {/* Live SSE Stream Tab in Sidebar */}
@@ -1597,44 +1780,80 @@ Timestamp: ${new Date().toISOString()}
 
             {/* Center & Right: Request Builder, Live Tester, and Code Generator */}
             <div className="flex-1 flex flex-col p-3 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 lg:overflow-y-auto">
-              {/* Endpoint Overview Header */}
-              <div className="p-4 bg-[#111722] border border-[#1e2a3b] rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-mono font-bold ${
-                        selectedEndpoint.id === 'get-screenshot'
-                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                          : selectedEndpoint.method === 'GET'
-                          ? 'bg-sky-500/20 text-sky-400'
-                          : 'bg-emerald-500/20 text-emerald-400'
-                      }`}
-                    >
-                      {selectedEndpoint.method}
-                    </span>
-                    <h1 className="text-sm sm:text-base font-bold text-slate-100">{selectedEndpoint.name}</h1>
-                    <span className="text-xs text-slate-400 font-mono">({selectedEndpoint.category})</span>
-                  </div>
-                  <p className="text-xs text-slate-300">{selectedEndpoint.description}</p>
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <span className="text-[11px] text-indigo-400 font-medium">ST-BOT Command:</span>
-                    <code className="text-[11px] font-mono text-amber-300 bg-[#161f2e] px-2 py-0.5 rounded border border-[#24334a]">
-                      !{selectedEndpoint.cmdName}
-                    </code>
-                    <span className="text-[11px] text-slate-400 font-mono">
-                      (scripts/cmds/{selectedEndpoint.cmdFileName})
-                    </span>
-                  </div>
+              {/* Endpoint Overview Header (Lovable / Stripe Docs style) */}
+              <div className="p-4 sm:p-5 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-3">
+                {/* Breadcrumbs */}
+                <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
+                  <span>Docs</span>
+                  <span>/</span>
+                  <span className="text-slate-300">{selectedEndpoint.category}</span>
+                  <span>/</span>
+                  <span className="text-emerald-400 font-bold">{selectedEndpoint.name}</span>
                 </div>
 
-                <button
-                  onClick={handleSendRequest}
-                  disabled={isLoading}
-                  className="w-full md:w-auto px-5 py-3 sm:py-2.5 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 shrink-0 min-h-[44px]"
-                >
-                  {isLoading ? <RefreshCw size={15} className="animate-spin" /> : <Play size={15} />}
-                  <span>{isLoading ? 'Executing Request...' : selectedEndpoint.id === 'get-screenshot' ? 'Snap Market Chart' : 'Send Live Request'}</span>
-                </button>
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`px-2 py-0.5 rounded text-xs font-mono font-bold ${
+                          selectedEndpoint.id === 'get-screenshot'
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                            : selectedEndpoint.method === 'GET'
+                            ? 'bg-sky-500/20 text-sky-400'
+                            : 'bg-emerald-500/20 text-emerald-400'
+                        }`}
+                      >
+                        {selectedEndpoint.method}
+                      </span>
+                      <h1 className="text-base sm:text-lg font-extrabold text-slate-100">{selectedEndpoint.name}</h1>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">
+                      {currentSpec?.description || selectedEndpoint.description}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={handleSendRequest}
+                    disabled={isLoading}
+                    className="w-full md:w-auto px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold rounded-lg text-xs flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-500/20 shrink-0 min-h-[42px]"
+                  >
+                    {isLoading ? <RefreshCw size={15} className="animate-spin" /> : <Play size={15} />}
+                    <span>{isLoading ? 'Executing Request...' : selectedEndpoint.id === 'get-screenshot' ? 'Snap Market Chart' : 'Send Live Request'}</span>
+                  </button>
+                </div>
+
+                {/* Direct Request URL Bar with Copy */}
+                <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between bg-[#0a0f18] border border-[#1b2536] rounded-lg px-3 py-2 text-xs font-mono gap-2">
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="text-emerald-400 font-bold">{selectedEndpoint.method}</span>
+                    <span className="text-slate-300 truncate">
+                      {(customApiBase || (typeof window !== 'undefined' ? window.location.origin : '')) + selectedEndpoint.path}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+                    <button
+                      onClick={() => {
+                        const fullUrl = (customApiBase || (typeof window !== 'undefined' ? window.location.origin : '')) + selectedEndpoint.path;
+                        navigator.clipboard.writeText(fullUrl);
+                        setCopiedEndpointPath(true);
+                        setTimeout(() => setCopiedEndpointPath(false), 2000);
+                      }}
+                      className="flex items-center gap-1.5 px-2 py-1 bg-[#141e2e] hover:bg-[#1d2b40] text-slate-300 rounded border border-[#23334a] text-[11px] transition-colors"
+                    >
+                      {copiedEndpointPath ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
+                      <span>{copiedEndpointPath ? 'Copied' : 'Copy URL'}</span>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab('master-cmd')}
+                      className="flex items-center gap-1 px-2 py-1 bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 rounded border border-amber-500/30 text-[11px] font-bold transition-colors"
+                    >
+                      <Sparkles size={11} />
+                      <span>In Master forex.js</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* LIVE MARKET CHART SCREENSHOT PREVIEW (Special Feature for Snap API) */}
@@ -1698,38 +1917,76 @@ Timestamp: ${new Date().toISOString()}
 
               {/* Parameters & Request Form */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                {/* Query Parameters Form */}
+                {/* Parameters Specification & Live Controls (Lovable Docs style) */}
                 <div className="p-4 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-3 sm:space-y-4">
                   <div className="flex items-center justify-between border-b border-[#1c2738] pb-2">
-                    <span className="text-xs font-bold text-slate-200">Request Parameters</span>
-                    <span className="text-[11px] font-mono text-slate-400">Query &amp; Path</span>
+                    <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <Terminal size={14} className="text-emerald-400" />
+                      <span>Request Parameters</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-400">
+                      {currentSpec?.params?.length || 0} parameter(s)
+                    </span>
                   </div>
 
-                  {Object.keys(queryParams).length === 0 && selectedEndpoint.method === 'GET' ? (
-                    <div className="py-4 text-center text-xs text-slate-400">No parameters required.</div>
-                  ) : (
+                  {currentSpec && currentSpec.params && currentSpec.params.length > 0 ? (
                     <div className="space-y-3">
-                      {Object.entries(queryParams).map(([key, val]) => (
-                        <div key={key} className="space-y-1">
-                          <label className="text-xs font-mono text-slate-300 flex items-center justify-between">
-                            <span>{key}</span>
-                            {(key === 'pair' || key === 'asset') && (
-                              <span className="text-[10px] text-emerald-400">
-                                e.g. EUR_USD, GBP_USD, XAU_USD
+                      {currentSpec.params.map((param) => (
+                        <div
+                          key={param.name}
+                          className="p-3 bg-[#0c121d] border border-[#1b2536] rounded-lg space-y-1.5"
+                        >
+                          <div className="flex items-center justify-between flex-wrap gap-1">
+                            <div className="flex items-center gap-2">
+                              <code className="text-xs font-mono font-bold text-emerald-400">{param.name}</code>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                                {param.type}
                               </span>
-                            )}
-                            {key === 'format' && (
-                              <span className="text-[10px] text-amber-400">
-                                'json' (data) or 'image' (direct SVG)
+                              <span
+                                className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
+                                  param.required
+                                    ? 'bg-rose-500/20 text-rose-300'
+                                    : 'bg-slate-700/50 text-slate-400'
+                                }`}
+                              >
+                                {param.required ? 'required' : 'optional'}
                               </span>
+                            </div>
+
+                            <span className="text-[10px] font-mono text-slate-500">
+                              default: <code className="text-slate-300">{param.default || 'none'}</code>
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-400 leading-relaxed">{param.description}</p>
+
+                          <div className="pt-1">
+                            {param.options ? (
+                              <select
+                                value={queryParams[param.name] !== undefined ? queryParams[param.name] : param.default}
+                                onChange={(e) =>
+                                  setQueryParams({ ...queryParams, [param.name]: e.target.value })
+                                }
+                                className="w-full bg-[#141e2e] border border-[#24334a] rounded px-2.5 py-1.5 text-xs font-mono text-slate-100 focus:outline-none focus:border-emerald-500"
+                              >
+                                {param.options.map((opt) => (
+                                  <option key={opt} value={opt}>
+                                    {opt}
+                                  </option>
+                                ))}
+                              </select>
+                            ) : (
+                              <input
+                                type="text"
+                                value={queryParams[param.name] !== undefined ? queryParams[param.name] : param.default}
+                                onChange={(e) =>
+                                  setQueryParams({ ...queryParams, [param.name]: e.target.value })
+                                }
+                                placeholder={`Enter ${param.name}...`}
+                                className="w-full bg-[#141e2e] border border-[#24334a] rounded px-2.5 py-1.5 text-xs font-mono text-slate-100 focus:outline-none focus:border-emerald-500"
+                              />
                             )}
-                          </label>
-                          <input
-                            type="text"
-                            value={val}
-                            onChange={(e) => setQueryParams({ ...queryParams, [key]: e.target.value })}
-                            className="w-full bg-[#161f2e] border border-[#24334a] rounded-lg px-3 py-2 sm:py-1.5 text-sm sm:text-xs font-mono text-slate-200 focus:outline-none focus:border-emerald-500 min-h-[40px]"
-                          />
+                          </div>
                         </div>
                       ))}
 
@@ -1744,6 +2001,10 @@ Timestamp: ${new Date().toISOString()}
                           />
                         </div>
                       )}
+                    </div>
+                  ) : (
+                    <div className="py-4 text-center text-xs text-slate-400">
+                      No parameters required. Endpoint operates on standard Interbank feeds.
                     </div>
                   )}
                 </div>
@@ -1826,6 +2087,50 @@ Timestamp: ${new Date().toISOString()}
                 </div>
               </div>
 
+              {/* Response Schema & Output Fields Documentation */}
+              {currentSpec && currentSpec.responseFields && currentSpec.responseFields.length > 0 && (
+                <div className="p-4 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-3">
+                  <div className="flex items-center justify-between border-b border-[#1c2738] pb-2">
+                    <span className="text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                      <Layers size={14} className="text-indigo-400" />
+                      <span>Response Schema &amp; Output Structure</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      HTTP 200 JSON
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs font-mono">
+                      <thead>
+                        <tr className="border-b border-[#1c2738] text-[11px] text-slate-500">
+                          <th className="pb-2 font-semibold">Field</th>
+                          <th className="pb-2 font-semibold">Type</th>
+                          <th className="pb-2 font-semibold">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#172233]">
+                        {currentSpec.responseFields.map((rf) => (
+                          <tr key={rf.field} className="hover:bg-[#141c2a]/50">
+                            <td className="py-2.5 pr-3 text-emerald-400 font-bold whitespace-nowrap">
+                              {rf.field}
+                            </td>
+                            <td className="py-2.5 pr-3 text-slate-400 whitespace-nowrap">
+                              <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-indigo-300">
+                                {rf.type}
+                              </span>
+                            </td>
+                            <td className="py-2.5 text-slate-300 font-sans text-[11px] leading-relaxed">
+                              {rf.description}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
               {/* Live SSE Stream Monitor Widget (Mobile-Friendly) */}
               <div className="p-4 bg-[#111722] border border-[#1e2a3b] rounded-xl space-y-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#1c2738] pb-2 gap-2">
@@ -1879,6 +2184,13 @@ Timestamp: ${new Date().toISOString()}
               </div>
             </div>
           </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* VIEW: MASTER ALL-IN-ONE ST-BOT COMMAND (forex.js)         */}
+        {/* ========================================================= */}
+        {activeTab === 'master-cmd' && (
+          <MasterCmdView customApiBase={customApiBase} />
         )}
 
         {/* ========================================================= */}
@@ -2459,6 +2771,35 @@ Timestamp: ${new Date().toISOString()}
                   <p className="text-[11px] text-slate-400">
                     Your assigned URL (e.g. <code className="text-teal-300">https://*.onrender.com</code>) is ready to paste into ST-BOT commands!
                   </p>
+                </div>
+              </div>
+
+              {/* ENOENT dist/index.html Resolution & Architecture Guarantee */}
+              <div className="bg-[#101826] border border-amber-500/30 rounded-xl p-4 sm:p-5 space-y-3">
+                <div className="flex items-center gap-2 text-amber-300 font-bold text-xs sm:text-sm">
+                  <ShieldCheck size={18} className="text-amber-400 shrink-0" />
+                  <span>ENOENT Fix &amp; Zero-Crash Build Guarantee</span>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  If you previously saw <code className="text-rose-400 bg-[#19111b] px-1.5 py-0.5 rounded font-mono text-[11px]">Error: ENOENT: no such file or directory, stat '/opt/render/project/src/dist/index.html'</code>, this occurs when Render starts Express before the Vite frontend has been compiled into <code className="text-slate-200 font-mono">dist/</code>.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1 text-xs">
+                  <div className="bg-[#0b1019] p-3 rounded-lg border border-[#1d293d] space-y-1">
+                    <span className="font-bold text-emerald-400 flex items-center gap-1.5">
+                      <CheckCircle2 size={14} /> Dual Automatic Build Hooks
+                    </span>
+                    <p className="text-slate-400 text-[11px] leading-relaxed">
+                      Added <code className="text-sky-300 font-mono">"postinstall": "vite build"</code> and <code className="text-sky-300 font-mono">"prestart": "vite build"</code> in <code className="text-slate-300">package.json</code>. Render will now automatically generate <code className="text-slate-300">dist/index.html</code> even if you forget to set the build command.
+                    </p>
+                  </div>
+                  <div className="bg-[#0b1019] p-3 rounded-lg border border-[#1d293d] space-y-1">
+                    <span className="font-bold text-emerald-400 flex items-center gap-1.5">
+                      <CheckCircle2 size={14} /> Resilient Express Runtime
+                    </span>
+                    <p className="text-slate-400 text-[11px] leading-relaxed">
+                      <code className="text-sky-300 font-mono">server.ts</code> now checks <code className="text-emerald-400 font-mono">fs.existsSync(indexPath)</code> before serving static files, with dynamic Vite fallback and safe error handlers. The server will never crash with ENOENT.
+                    </p>
+                  </div>
                 </div>
               </div>
 

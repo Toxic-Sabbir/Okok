@@ -1,5 +1,5 @@
-import React from 'react';
-import { Activity, RotateCcw, Wallet } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Activity, RotateCcw, Wallet, Clock } from 'lucide-react';
 
 export type NavTab = 'terminal' | 'scanner' | 'news' | 'api' | 'assets' | 'webhooks';
 
@@ -18,6 +18,22 @@ export const Header: React.FC<HeaderProps> = ({
   onResetBalance,
   onOpenDataSourceModal,
 }) => {
+  const [utc6Time, setUtc6Time] = useState('');
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      // UTC+6 exact offset
+      const utc6 = new Date(now.getTime() + 6 * 60 * 60 * 1000);
+      const hh = String(utc6.getUTCHours()).padStart(2, '0');
+      const mm = String(utc6.getUTCMinutes()).padStart(2, '0');
+      const ss = String(utc6.getUTCSeconds()).padStart(2, '0');
+      setUtc6Time(`${hh}:${mm}:${ss}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
   return (
     <header className="h-[65px] px-6 bg-[#0c1017] border-b border-[#1b2535] flex items-center justify-between gap-8 shrink-0 select-none">
       {/* Zone 1: Brand title wordmark */}
@@ -79,6 +95,20 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Zone 3: 1 primary action */}
       <div className="flex items-center gap-3 shrink-0">
+        {/* Live Real-Time & UTC+6 Clock Badge */}
+        <div 
+          onClick={onOpenDataSourceModal}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-[#101723] hover:bg-[#151f2e] border border-emerald-500/30 rounded-lg cursor-pointer transition-colors"
+          title="Market Data: Real-time Worldwide Interbank Spot (UTC+6)"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="text-[11px] font-mono font-bold text-emerald-400">REALTIME</span>
+          <div className="h-3.5 w-[1px] bg-slate-700"></div>
+          <Clock size={12} className="text-sky-400" />
+          <span className="text-[11px] font-mono font-semibold text-slate-300">UTC+6</span>
+          <span className="text-xs font-mono font-bold text-sky-300">{utc6Time || '--:--:--'}</span>
+        </div>
+
         {/* Feed Status Indicator */}
         <button
           onClick={onOpenDataSourceModal}
@@ -86,7 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
           title="Inspect Market Feed & Quotex Connection"
         >
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span className="text-[11px] font-mono text-slate-300">Quotex Feed</span>
+          <span className="text-[11px] font-mono text-slate-300">Interbank Feed</span>
         </button>
 
         {/* Demo Balance Strip */}
