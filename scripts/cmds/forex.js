@@ -231,7 +231,25 @@ ${listStr}
     }
 
     // ─────────────────────────────────────────────────────────────
-    // SUBCOMMAND 6: MENU / HELP (No args provided)
+    // SUBCOMMAND 6: FUTURE (Scheduled Upcoming VIP Signals in UTC+6)
+    // ─────────────────────────────────────────────────────────────
+    if (sub === "future" || sub === "fut" || sub === "sched" || sub === "upcoming") {
+      const count = Number(args[1]) || 5;
+      const tf = args[2] || "1m";
+      await reply(`💎 [ZYRO BOT] Generating ${count} VIP scheduled future signals (${tf}) in UTC+6...`);
+      try {
+        const res = await axios.get(`${BASE_URL}/api/v1/forex/future-signals?count=${count}&timeframe=${tf}&format=text`, { timeout: 10000 });
+        if (res.data) {
+          return reply(res.data);
+        }
+        return reply(`❌ [ZYRO BOT] Failed to generate future signals.`);
+      } catch (err) {
+        return reply(`❌ [ZYRO BOT] Future Signal Error: ${err.response?.data?.error || err.message}`);
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // SUBCOMMAND 7: MENU / HELP (No args provided)
     // ─────────────────────────────────────────────────────────────
     if (!args[0] || sub === "help" || sub === "menu") {
       return reply(
@@ -242,6 +260,7 @@ Status: Online (100% Real-Time Institutional Interbank Spot)
 
 ⚡ ZYRO BOT MASTER COMMANDS:
 • !zyro [pair]        -> All-In-One quote, AI signal & news (UTC+6)
+• !zyro future [5]    -> VIP scheduled upcoming signals (UTC+6 entry times)
 • !zyro snap [pair]   -> Live candlestick chart screenshot
 • !zyro signal [pair] -> Next candle CALL/PUT & win rate %
 • !zyro scan          -> Scan pairs & rank top win-rate setups
@@ -250,10 +269,10 @@ Status: Online (100% Real-Time Institutional Interbank Spot)
 • !zyro pairs         -> View all active Forex pairs & payouts
 
 📌 Examples:
+!zyro future 5
 !zyro EUR_USD
 !zyro snap GBP_USD 1m
 !zyro scan
-!zyro news
 
 🔥 Aliases: !zyro or !fx both work everywhere!`);
     }

@@ -108,6 +108,19 @@ export const ENDPOINTS: EndpointConfig[] = [
     cmdGuide: '{pn} [pair, e.g. EUR_USD, GBP_USD] [timeframe, e.g. 1m, 5m]',
   },
   {
+    id: 'get-future-signals',
+    method: 'GET',
+    path: '/api/v1/forex/future-signals',
+    name: 'VIP Scheduled Future Signals (Future Signal API)',
+    description: 'Generates scheduled VIP trading signals for upcoming candle intervals with exact entry times in UTC+6 (BST), countdown seconds, CALL/PUT direction, win rate %, projected strike/target, and Martingale advice.',
+    category: 'Signal & Analysis',
+    defaultParams: { timeframe: '1m', count: '6', minConfidence: '80', format: 'json' },
+    cmdFileName: 'fxfuture.js',
+    cmdName: 'fxfuture',
+    cmdDescription: 'Fetch VIP scheduled future signals with exact entry times in UTC+6',
+    cmdGuide: '{pn} [optional count: 5|10] [optional timeframe: 1m|5m] [optional format: text|json]',
+  },
+  {
     id: 'get-scanner',
     method: 'GET',
     path: '/api/v1/forex/scanner',
@@ -404,6 +417,8 @@ export const ApiExplorer: React.FC<ApiExplorerProps> = () => {
           summaryText = `Quote ${data.quote?.currentPrice} • Next Candle: ${data.analysis?.signal} (${data.analysis?.confidence}%)`;
         } else if (ep.id === 'get-analyze') {
           summaryText = `Signal: ${data.data?.direction} • ${data.data?.confidence}% Confidence`;
+        } else if (ep.id === 'get-future-signals') {
+          summaryText = `${data.count} VIP future signals generated • Next: ${data.data?.[0]?.scheduledTimeShort} (${data.data?.[0]?.symbol} ${data.data?.[0]?.direction})`;
         } else if (ep.id === 'get-scanner') {
           summaryText = `${data.count} Worldwide pairs scanned • Top Buy: ${data.topBuy?.symbol}`;
         } else if (ep.id === 'get-pair-impact') {
@@ -813,6 +828,55 @@ module.exports = {
 💡 Guidance: \${sig.reasoning}\`;
 
       return reply(msg);
+    } catch (err) {
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
+    }
+  }
+};`;
+    }
+
+    if (ep.id === 'get-future-signals') {
+      return `/**
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
+ * Path: scripts/cmds/${ep.cmdFileName}
+ * Description: ${ep.cmdDescription}
+ * Timezone: UTC+6 (Bangladesh Standard Time / BST)
+ */
+
+const axios = require("axios");
+
+module.exports = {
+  config: {
+    name: "${ep.cmdName}",
+    aliases: ["future", "fut", "sched", "vip"],
+    version: "2.0.0",
+    author: "ZYRO BOT Team",
+    countDown: 3,
+    role: 0,
+    shortDescription: "${ep.cmdDescription}",
+    longDescription: "Generates scheduled upcoming VIP signals with exact entry times in UTC+6, win rate %, strike prices, and Martingale advice.",
+    category: "forex",
+    guide: "{pn} [optional count: 5|10] [optional timeframe: 1m|5m]"
+  },
+
+  onStart: async function ({ api, event, args, message }) {
+    const reply = (text) => {
+      if (message && message.reply) return message.reply(text);
+      if (api && api.sendMessage) return api.sendMessage(text, event.threadID, event.messageID);
+    };
+
+    try {
+      const count = Number(args[0]) || 6;
+      const tf = args[1] || "1m";
+
+      await reply(\`💎 [ZYRO BOT] Generating \${count} scheduled future signals (\${tf}) in UTC+6...\`);
+
+      const res = await axios.get("${origin}/api/v1/forex/future-signals?count=" + count + "&timeframe=" + tf + "&format=text", { timeout: 10000 });
+      if (res.data) {
+        return reply(res.data);
+      }
+      return reply("❌ Failed to generate future signals.");
     } catch (err) {
       return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }

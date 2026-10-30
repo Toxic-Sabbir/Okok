@@ -19,6 +19,12 @@ export const MASTER_SUBCOMMANDS: MasterSubCommand[] = [
     category: 'core',
   },
   {
+    syntax: '!zyro future [count] [tf]',
+    shortDesc: 'VIP Scheduled Future Signals: Predicts exact upcoming candle entry times in UTC+6 with strike & target',
+    example: '!zyro future 5 1m',
+    category: 'core',
+  },
+  {
     syntax: '!zyro snap [pair] [tf]',
     shortDesc: 'Captures and sends live HD candlestick chart image with ZYRO BOT Signal HUD overlay',
     example: '!zyro snap EUR_USD 1m',

@@ -210,6 +210,12 @@ Pair: ${pair} | Overall Sentiment: ${data.overallSentiment || 'NEUTRAL'}
 
 ${lines}`
         );
+      } else if (sub === 'future' || sub === 'fut' || sub === 'sched') {
+        const count = Number(parts[2]) || 5;
+        const tf = parts[3] || '1m';
+        const res = await fetch(`${baseUrl}/api/v1/forex/future-signals?count=${count}&timeframe=${tf}&format=text`);
+        const text = await res.text();
+        setSimOutput(text);
       } else if (sub === 'pairs' || sub === 'assets' || sub === 'list') {
         const res = await fetch(`${baseUrl}/api/v1/forex/assets`);
         const data = await res.json();
@@ -389,8 +395,8 @@ ${listStr}
           <div className="flex flex-wrap gap-1.5">
             {[
               { label: '!fx (Help Menu)', cmd: '!fx' },
+              { label: '💎 !zyro future (VIP Scheduled Signals)', cmd: '!zyro future 5' },
               { label: '!fx EUR_USD (All-In-One)', cmd: '!fx EUR_USD' },
-              { label: '!fx GBP_USD 1m', cmd: '!fx GBP_USD 1m' },
               { label: '!fx snap EUR_USD (Chart Image)', cmd: '!fx snap EUR_USD' },
               { label: '!fx scan (Market Scanner)', cmd: '!fx scan' },
               { label: '!fx news (Forex Factory)', cmd: '!fx news' },
