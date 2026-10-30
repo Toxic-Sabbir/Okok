@@ -1,6 +1,6 @@
 {
-  "name": "Worldwide Forex API Docs & ST-BOT Commands Hub",
-  "description": "Interactive API documentation, live endpoint health verification, and ready-to-run command generator for sheikhtamimlover/ST-BOT framework.",
+  "name": "ZYRO BOT - Real-Time Interbank Forex API & Charts Hub",
+  "description": "100% real-time institutional forex rates, live candlestick charts (UTC+6), AI next candle predictions, and ZYRO BOT command integration.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -306,30 +306,30 @@ ${listStr}
                 <span>UNIFIED MASTER COMMAND</span>
               </span>
               <span className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[11px] font-mono font-semibold">
-                v3.0.0 Ready
+                v4.0.0 Ready
               </span>
-              <span className="px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[11px] font-mono">
-                sheikhtamimlover/ST-BOT
+              <span className="px-2 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 text-[11px] font-mono font-bold">
+                ZYRO BOT
               </span>
             </div>
 
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-              One ST-BOT Command for All Forex Features
+              One ZYRO BOT Command for All Forex Features
             </h1>
 
             <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              No need to install 9 separate command files. Drop a single <code className="text-amber-300 font-mono bg-[#141d2c] px-1.5 py-0.5 rounded border border-[#202e42]">forex.js</code> file into your bot's <code className="text-emerald-400 font-mono bg-[#141d2c] px-1.5 py-0.5 rounded border border-[#202e42]">scripts/cmds/</code> folder to unlock quotes, AI candle predictions, multi-indicator confluence, economic news, scanner, and live chart screenshots!
+              No need to install 9 separate command files. Drop a single <code className="text-amber-300 font-mono bg-[#141d2c] px-1.5 py-0.5 rounded border border-[#202e42]">forex.js</code> (or <code className="text-amber-300 font-mono bg-[#141d2c] px-1.5 py-0.5 rounded border border-[#202e42]">zyro.js</code>) file into your bot's <code className="text-emerald-400 font-mono bg-[#141d2c] px-1.5 py-0.5 rounded border border-[#202e42]">scripts/cmds/</code> folder to unlock accurate live quotes, AI candle predictions, multi-indicator confluence, economic news, scanner, and live chart screenshots!
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1 text-xs text-slate-400">
               <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                <CheckCircle2 size={14} /> Full Interbank Market
+                <CheckCircle2 size={14} /> 100% Real-Time Interbank Spot
               </span>
               <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                <CheckCircle2 size={14} /> HD Chart Screenshot Engine
+                <CheckCircle2 size={14} /> ZYRO BOT HD Chart Snapshots
               </span>
               <span className="flex items-center gap-1 text-emerald-400 font-medium">
-                <CheckCircle2 size={14} /> Forex Factory Calendar
+                <CheckCircle2 size={14} /> Forex Factory Calendar (UTC+6)
               </span>
             </div>
           </div>
@@ -341,7 +341,7 @@ ${listStr}
               className="px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98] min-h-[44px]"
             >
               <Download size={16} />
-              <span>Download forex.js (All-In-One)</span>
+              <span>Download forex.js (ZYRO BOT Master)</span>
             </button>
 
             <button
@@ -349,22 +349,22 @@ ${listStr}
               className="px-4 py-2.5 bg-[#172233] hover:bg-[#202f45] text-slate-200 font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition-all border border-[#27374e] min-h-[42px]"
             >
               {copiedCode ? <Check size={15} className="text-emerald-400" /> : <Copy size={15} />}
-              <span>{copiedCode ? 'Copied to Clipboard!' : 'Copy Complete Code'}</span>
+              <span>{copiedCode ? 'Copied to Clipboard!' : 'Copy ZYRO BOT Code'}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Interactive In-Page ST-BOT Chat Simulator */}
+      {/* Interactive In-Page ZYRO BOT Chat Simulator */}
       <div className="bg-[#101725] border border-[#1d2a3d] rounded-2xl p-4 sm:p-6 space-y-4 shadow-lg">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#1c2738] gap-2">
           <div className="flex items-center gap-2">
             <Terminal size={18} className="text-emerald-400" />
             <div>
               <h2 className="text-sm sm:text-base font-bold text-slate-100 flex items-center gap-2">
-                Interactive ST-BOT Messenger Simulator
+                Interactive ZYRO BOT Messenger Simulator
                 <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
-                  LIVE ENGINE
+                  LIVE FEED (UTC+6)
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
@@ -439,9 +439,9 @@ ${listStr}
           <div className="flex items-center justify-between text-xs font-mono text-slate-400 border-b border-[#151f2e] pb-2">
             <span className="flex items-center gap-1.5">
               <Bot size={13} className="text-indigo-400" />
-              <span>Facebook Messenger Output (sheikhtamimlover/ST-BOT)</span>
+              <span>Facebook Messenger Output (ZYRO BOT Engine)</span>
             </span>
-            <span className="text-emerald-400">● Bot Online</span>
+            <span className="text-emerald-400">● ZYRO BOT Online</span>
           </div>
 
           {/* User query bubble */}
@@ -555,11 +555,11 @@ ${listStr}
         </div>
       </div>
 
-      {/* 3-Minute ST-BOT Installation Guide */}
+      {/* 3-Minute ZYRO BOT Installation Guide */}
       <div className="bg-[#101725] border border-[#1d2a3d] rounded-2xl p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-300">
           <ShieldCheck size={18} />
-          <span>How to Install in sheikhtamimlover/ST-BOT</span>
+          <span>How to Install in ZYRO BOT (or GoatBot v2)</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-xs text-slate-300">

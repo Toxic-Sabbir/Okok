@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
           <Activity size={18} />
         </div>
         <span className="text-base font-extrabold tracking-tight text-white">
-          WORLDWIDE <span className="text-emerald-400 font-semibold text-xs ml-1 font-mono">FOREX API</span>
+          ZYRO BOT <span className="text-emerald-400 font-semibold text-xs ml-1 font-mono">FOREX API</span>
         </span>
       </div>
 
@@ -78,7 +78,7 @@ export const Header: React.FC<HeaderProps> = ({
             currentTab === 'api' ? 'text-emerald-400 font-semibold' : ''
           }`}
         >
-          <span>API &amp; ST-BOT</span>
+          <span>API &amp; ZYRO BOT</span>
           <span className="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded font-mono font-bold">
             CMDs
           </span>

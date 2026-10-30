@@ -236,10 +236,10 @@ export const ApiExplorer: React.FC<ApiExplorerProps> = () => {
   // Mobile drawer / sidebar toggle
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
-  // Custom API base for ST-BOT commands
+  // Custom API base for ZYRO BOT commands
   const [customApiBase, setCustomApiBase] = useState<string>('');
 
-  // Selected ST-BOT command in dedicated tab
+  // Selected ZYRO BOT command in dedicated tab
   const [selectedStBotCmd, setSelectedStBotCmd] = useState<EndpointConfig>(ENDPOINTS[0]);
   const [copiedStBotCmd, setCopiedStBotCmd] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
@@ -520,14 +520,14 @@ export const ApiExplorer: React.FC<ApiExplorerProps> = () => {
     };
   }, []);
 
-  // Generate ST-BOT Command Script for a given endpoint
+  // Generate ZYRO BOT Command Script for a given endpoint
   const generateStBotCommandCode = (ep: EndpointConfig) => {
     const origin = customApiBase || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
 
     if (ep.id === 'get-quotes') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  * Timezone: UTC+6 (Bangladesh Standard Time / BST)
@@ -576,7 +576,7 @@ module.exports = {
 
 💡 Type "!fx EUR_USD" for deep AI signal analysis!\`);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -584,8 +584,8 @@ module.exports = {
 
     if (ep.id === 'get-screenshot') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -657,7 +657,7 @@ module.exports = {
         return reply(caption);
       }
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -665,8 +665,8 @@ module.exports = {
 
     if (ep.id === 'get-all-in-one') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -740,7 +740,7 @@ module.exports = {
 
       return reply(msg);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -748,8 +748,8 @@ module.exports = {
 
     if (ep.id === 'get-analyze') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -814,7 +814,7 @@ module.exports = {
 
       return reply(msg);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -822,8 +822,8 @@ module.exports = {
 
     if (ep.id === 'get-scanner') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -888,7 +888,7 @@ module.exports = {
 
       return reply(msg);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -896,8 +896,8 @@ module.exports = {
 
     if (ep.id === 'get-pair-impact') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -958,7 +958,7 @@ Forex Factory Economic Confluence & Macro Direction
 
       return reply(msg);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -966,8 +966,8 @@ Forex Factory Economic Confluence & Macro Direction
 
     if (ep.id === 'get-news') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -1028,7 +1028,7 @@ Filter: \${impact} Impact | Total Events: \${data.count}
 
       return reply(msg);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -1036,8 +1036,8 @@ Filter: \${impact} Impact | Total Events: \${data.count}
 
     if (ep.id === 'get-candles') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -1099,7 +1099,7 @@ Latest \${candles.length} Candles:
 
       return reply(msg);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -1107,8 +1107,8 @@ Latest \${candles.length} Candles:
 
     if (ep.id === 'get-assets') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -1163,7 +1163,7 @@ Category: \${category.toUpperCase()} | Showing \${pairs.length} of \${data.count
 
       return reply(msg);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
@@ -1171,8 +1171,8 @@ Category: \${category.toUpperCase()} | Showing \${pairs.length} of \${data.count
 
     if (ep.id === 'simulate-order') {
       return `/**
- * ST-BOT Command: ${ep.cmdFileName}
- * Framework: sheikhtamimlover/ST-BOT (GoatBot v2 / ST-FCA)
+ * ZYRO BOT Command: ${ep.cmdFileName}
+ * Framework: ZYRO BOT (GoatBot v2 / ST-FCA)
  * Path: scripts/cmds/${ep.cmdFileName}
  * Description: ${ep.cmdDescription}
  */
@@ -1241,13 +1241,13 @@ Status: ACTIVE (Waiting for candle settlement...)\`;
 
       return reply(msg);
     } catch (err) {
-      return reply(\`❌ ST-BOT Error: \${err.response?.data?.error || err.message}\`);
+      return reply(\`❌ ZYRO BOT Error: \${err.response?.data?.error || err.message}\`);
     }
   }
 };`;
     }
 
-    return `// ST-BOT command template for ${ep.name}\nmodule.exports = { ... };`;
+    return `// ZYRO BOT command template for ${ep.name}\nmodule.exports = { ... };`;
   };
 
   // Compute Code Snippet for standard tabs
@@ -1354,11 +1354,11 @@ print("Trade Settlement:", response.json())`;
         cmdsFolder?.file(ep.cmdFileName, code);
       });
 
-      const readmeContent = `# ST-BOT Forex & Quotex Commands Bundle
-Framework: https://github.com/sheikhtamimlover/ST-BOT
+      const readmeContent = `# ZYRO BOT Forex & Quotex Commands Bundle
+Framework: https://github.com/ZYRO BOT
 
 ## Installation Guide:
-1. Copy the 'scripts/cmds/' folder directly into your ST-BOT root directory.
+1. Copy the 'scripts/cmds/' folder directly into your ZYRO BOT root directory.
 2. Ensure 'axios' is installed in your bot project:
    npm install axios
 3. Run your bot:
@@ -1415,12 +1415,12 @@ Timestamp: ${new Date().toISOString()}
                 WORLDWIDE FOREX API
               </span>
               <span className="px-1.5 py-0.5 rounded text-[9px] sm:text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                SNAP &amp; ST-BOT
+                SNAP &amp; ZYRO BOT
               </span>
             </div>
             <div className="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span>Chart Snapshots • Real Interbank Quotes • ST-BOT CMDs</span>
+              <span>Chart Snapshots • Real Interbank Quotes • ZYRO BOT CMDs</span>
             </div>
           </div>
         </div>
@@ -1466,7 +1466,7 @@ Timestamp: ${new Date().toISOString()}
                 downloadFile('forex.js', code);
               }}
               className="px-3 sm:px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-[11px] sm:text-xs font-extrabold rounded-lg flex items-center gap-1.5 shadow-md shadow-amber-500/20 transition-all min-h-[36px]"
-              title="Download All-In-One ST-BOT Command (forex.js)"
+              title="Download All-In-One ZYRO BOT Command (forex.js)"
             >
               <Download size={13} />
               <span>Download forex.js</span>
@@ -1555,19 +1555,19 @@ Timestamp: ${new Date().toISOString()}
           </button>
         </div>
 
-        {/* ST-BOT Github Link & Render Pill */}
+        {/* ZYRO BOT Github Link & Render Pill */}
         <div className="flex items-center gap-3">
           <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded bg-teal-500/15 border border-teal-500/30 text-teal-300 text-[11px] font-mono">
             <Cloud size={11} /> Render Friendly
           </span>
           <a
-            href="https://github.com/sheikhtamimlover/ST-BOT"
+            href="https://github.com/ZYRO BOT"
             target="_blank"
             rel="noopener noreferrer"
             className="hidden md:flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition-colors shrink-0"
           >
             <ExternalLink size={13} />
-            <span>github.com/sheikhtamimlover/ST-BOT</span>
+            <span>github.com/ZYRO BOT</span>
           </a>
         </div>
       </div>
@@ -1688,7 +1688,7 @@ Timestamp: ${new Date().toISOString()}
                     <span className="text-[10px] font-mono text-amber-300">forex.js</span>
                   </div>
                   <div className="text-xs font-bold text-slate-100 group-hover:text-amber-200 transition-colors">
-                    All-In-One ST-BOT Command
+                    All-In-One ZYRO BOT Command
                   </div>
                   <div className="text-[11px] text-slate-400 leading-tight">
                     Quotes, signals, news, scanner &amp; chart snaps in 1 single command
@@ -2029,7 +2029,7 @@ Timestamp: ${new Date().toISOString()}
                               : 'text-slate-400 hover:text-slate-200'
                           }`}
                         >
-                          {tab === 'st-bot' ? '🤖 ST-BOT' : tab}
+                          {tab === 'st-bot' ? '🤖 ZYRO BOT' : tab}
                         </button>
                       ))}
                     </div>
@@ -2187,14 +2187,14 @@ Timestamp: ${new Date().toISOString()}
         )}
 
         {/* ========================================================= */}
-        {/* VIEW: MASTER ALL-IN-ONE ST-BOT COMMAND (forex.js)         */}
+        {/* VIEW: MASTER ALL-IN-ONE ZYRO BOT COMMAND (forex.js)         */}
         {/* ========================================================= */}
         {activeTab === 'master-cmd' && (
           <MasterCmdView customApiBase={customApiBase} />
         )}
 
         {/* ========================================================= */}
-        {/* VIEW 2: ST-BOT COMMANDS DOWNLOAD HUB                     */}
+        {/* VIEW 2: ZYRO BOT COMMANDS DOWNLOAD HUB                     */}
         {/* ========================================================= */}
         {activeTab === 'st-bot' && (
           <div className="flex-1 flex flex-col lg:flex-row lg:overflow-hidden w-full">
@@ -2202,7 +2202,7 @@ Timestamp: ${new Date().toISOString()}
             <div className="lg:hidden p-3 bg-[#0d131d] border-b border-[#1a2332] space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
-                  Pick ST-BOT Command:
+                  Pick ZYRO BOT Command:
                 </span>
                 <span className="text-[10px] text-amber-300 font-mono">scripts/cmds/</span>
               </div>
@@ -2233,7 +2233,7 @@ Timestamp: ${new Date().toISOString()}
               <div className="p-4 border-b border-[#1a2332] bg-[#090e17]">
                 <div className="flex items-center gap-2 text-sm font-bold text-slate-100">
                   <Bot size={18} className="text-indigo-400" />
-                  <span>sheikhtamimlover/ST-BOT</span>
+                  <span>ZYRO BOT</span>
                 </div>
                 <p className="text-xs text-slate-400 mt-1">
                   Ready-to-use command files (.js) for GoatBot v2 / ST-FCA Messenger bot framework.
@@ -2299,9 +2299,9 @@ Timestamp: ${new Date().toISOString()}
               </div>
             </div>
 
-            {/* Right ST-BOT Command Code Viewer & Installation Guide */}
+            {/* Right ZYRO BOT Command Code Viewer & Installation Guide */}
             <div className="flex-1 flex flex-col p-3 sm:p-5 lg:p-6 space-y-4 sm:space-y-6 lg:overflow-y-auto">
-              {/* Header for Selected ST-BOT Command */}
+              {/* Header for Selected ZYRO BOT Command */}
               <div className="p-4 bg-[#111722] border border-[#1e2a3b] rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -2360,11 +2360,11 @@ Timestamp: ${new Date().toISOString()}
                 </div>
               </div>
 
-              {/* ST-BOT Installation Steps Card */}
+              {/* ZYRO BOT Installation Steps Card */}
               <div className="p-4 bg-[#0e1624] border border-[#213045] rounded-xl">
                 <div className="flex items-center gap-2 mb-2 text-xs font-bold text-amber-300">
                   <Sparkles size={14} />
-                  <span>How to Install in sheikhtamimlover/ST-BOT</span>
+                  <span>How to Install in ZYRO BOT</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
                   <div className="bg-[#121b2a] p-3 rounded-lg border border-[#1f2d42]">
@@ -2392,7 +2392,7 @@ Timestamp: ${new Date().toISOString()}
                 </div>
               </div>
 
-              {/* Full JavaScript Code Viewer for ST-BOT Command */}
+              {/* Full JavaScript Code Viewer for ZYRO BOT Command */}
               <div className="flex-1 flex flex-col bg-[#0b101a] border border-[#1e2a3b] rounded-xl overflow-hidden">
                 <div className="px-3 sm:px-4 py-2.5 bg-[#0e1522] border-b border-[#1b2535] flex items-center justify-between">
                   <div className="flex items-center gap-2 truncate">
@@ -2437,7 +2437,7 @@ Timestamp: ${new Date().toISOString()}
                   </h1>
                 </div>
                 <p className="text-xs text-slate-400">
-                  Verifies that all 9 backend endpoints are online, responding with HTTP 200 OK, and delivering live Forex and ST-BOT data.
+                  Verifies that all 9 backend endpoints are online, responding with HTTP 200 OK, and delivering live Forex and ZYRO BOT data.
                 </p>
               </div>
 
@@ -2570,7 +2570,7 @@ Timestamp: ${new Date().toISOString()}
                       </span>
                     </h1>
                     <p className="text-xs text-slate-400">
-                      Zero-config blueprint deployment with dynamic <code className="text-teal-300">$PORT</code> binding, SSL proxy trust, and open CORS for ST-BOT.
+                      Zero-config blueprint deployment with dynamic <code className="text-teal-300">$PORT</code> binding, SSL proxy trust, and open CORS for ZYRO BOT.
                     </p>
                   </div>
                 </div>
@@ -2647,7 +2647,7 @@ Timestamp: ${new Date().toISOString()}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400">
-                  Allows remote ST-BOT instances, Facebook Messenger webhooks, and third-party dashboards to query without CORS blocks.
+                  Allows remote ZYRO BOT instances, Facebook Messenger webhooks, and third-party dashboards to query without CORS blocks.
                 </p>
               </div>
 
@@ -2766,10 +2766,10 @@ Timestamp: ${new Date().toISOString()}
                     <span className="w-5 h-5 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center text-xs font-bold font-mono">
                       3
                     </span>
-                    <span className="text-xs font-bold text-slate-200">Connect ST-BOT</span>
+                    <span className="text-xs font-bold text-slate-200">Connect ZYRO BOT</span>
                   </div>
                   <p className="text-[11px] text-slate-400">
-                    Your assigned URL (e.g. <code className="text-teal-300">https://*.onrender.com</code>) is ready to paste into ST-BOT commands!
+                    Your assigned URL (e.g. <code className="text-teal-300">https://*.onrender.com</code>) is ready to paste into ZYRO BOT commands!
                   </p>
                 </div>
               </div>
